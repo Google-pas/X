@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة العائلة</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #60a5fa;
+            --background-color: #f8fafc;
+            --text-color: #1e293b;
+            --error-color: #ef4444;
+            --success-color: #22c55e;
+            --border-radius: 16px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Arabic', sans-serif;
+            background: linear-gradient(135deg, var(--background-color), #e0e7ff);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            direction: rtl;
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            transform: translateY(0);
+            transition: var(--transition);
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 3.5rem;
+            margin-bottom: 40px;
+            text-align: center;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 2px;
+        }
+
+        .welcome, .question-container, .result-container, .not-allowed {
+            display: none;
+            animation: slideUp 0.5s ease-out;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .show {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        select {
+            width: 100%;
+            padding: 16px 24px;
+            border: 2px solid #e2e8f0;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            margin: 20px 0;
+            font-family: inherit;
+            cursor: pointer;
+            transition: var(--transition);
+            background: white;
+            color: var(--text-color);
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%231e293b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: left 1rem center;
+            background-size: 1.5rem;
+            padding-left: 3rem;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: var(--border-radius);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: inherit;
+            margin: 10px 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+        }
+
+        .question {
+            font-size: 1.8rem;
+            margin: 30px 0;
+            color: var(--text-color);
+            text-align: center;
+            font-weight: 700;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .options {
+            display: grid;
+            gap: 16px;
+        }
+
+        .options button {
+            background: white;
+            color: var(--text-color);
+            border: 2px solid #e2e8f0;
+            font-weight: 500;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .options button:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .options button.correct {
+            background: var(--success-color);
+            color: white;
+            border-color: var(--success-color);
+        }
+
+        .options button.wrong {
+            background: var(--error-color);
+            color: white;
+            border-color: var(--error-color);
+        }
+
+        .progress-container {
+            width: 100%;
+            background: #e2e8f0;
+            border-radius: 100px;
+            padding: 4px;
+            margin: 30px 0;
+        }
+
+        .progress-bar {
+            width: 0%;
+            height: 20px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 100px;
+            transition: width 0.5s ease;
+            position: relative;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .result-container {
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 30px 0;
+            animation: bounceIn 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .celebration {
+            font-size: 2rem;
+            margin: 20px 0;
+            animation: tada 1s;
+        }
+
+        .dua {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin: 30px 0;
+            font-style: italic;
+            color: #64748b;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0.3);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            70% {
+                transform: scale(0.9);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes tada {
+            0% {
+                transform: scale(1);
+            }
+            10%, 20% {
+                transform: scale(0.9) rotate(-3deg);
+            }
+            30%, 50%, 70%, 90% {
+                transform: scale(1.1) rotate(3deg);
+            }
+            40%, 60%, 80% {
+                transform: scale(1.1) rotate(-3deg);
+            }
+            100% {
+                transform: scale(1) rotate(0);
+            }
+        }
+
+        /* رسالة الخطأ المحسنة */
+        .not-allowed {
+            text-align: center;
+            padding: 30px;
+            background: #fef2f2;
+            border-radius: var(--border-radius);
+            border: 2px solid #fee2e2;
+        }
+
+        .not-allowed p {
+            color: var(--error-color);
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .not-allowed button {
+            background: var(--error-color);
+        }
+
+        .not-allowed button:hover {
+            background: #dc2626;
+        }
+
+        /* تحسين التجاوب مع الشاشات الصغيرة */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .question {
+                font-size: 1.4rem;
+            }
+
+            .score-display {
+                font-size: 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="animate__animated animate__bounceIn">لعبة العائلة</h1>
+        
+        <div class="welcome show">
+            <p class="animate__animated animate__fadeIn">أهلاً وسهلاً بك في لعبة العائلة! اختر من أي فرد من العائلة أنت:</p>
+            <select id="familyMember">
+                <option value="" disabled selected>اختر اسمك...</option>
+                <option>حمود حيدر ابو صقر</option>
+                <option>ام صقر</option>
+                <option>ام يزن</option>
+                <option>صقر</option>
+                <option>علي</option>
+                <option>براءة</option>
+                <option>محمد</option>
+                <option>يزن</option>
+                <option>راكان</option>
+            </select>
+            <button onclick="startQuiz()">
+                <i class="fas fa-play"></i>
+                ابدأ اللعبة
+            </button>
+        </div>
+
+        <div class="not-allowed">
+            <p>انت بالاول تعلم تقرا وبعدين تعال هههههههههههه 😄</p>
+            <button onclick="goBack()">
+                <i class="fas fa-arrow-right"></i>
+                رجوع
+            </button>
+        </div>
+
+        <div class="question-container">
+            <div class="progress-container">
+                <div class="progress-bar">
+                    <span class="progress-text">0%</span>
+                </div>
+            </div>
+            <p id="greeting"></p>
+            <p class="question" id="questionText"></p>
+            <div class="options" id="options"></div>
+        </div>
+
+        <div class="result-container">
+            <div class="score-display" id="scoreDisplay"></div>
+            <p class="celebration" id="celebration"></p>
+            <p id="finalResult"></p>
+            <div class="dua">
+                <p>اللهم احفظ لي عائلتي بعينك التي لا تنام، وبارك لنا في أعمارنا واجمعنا على الخير دائمًا. 🤲</p>
+            </div>
+            <button onclick="restartQuiz()">
+                <i class="fas fa-redo-alt"></i>
+                إعادة اللعب
+            </button>
+            <button onclick="closeApp()" style="background: #94a3b8;">
+                <i class="fas fa-times"></i>
+                إغلاق
+            </button>
+        </div>
+    </div>
+
+<!DOCTYPE html>
+<html lang="ar">
+<!-- ... (نفس كود HTML و CSS السابق حتى نهاية style) ... -->
+
+<script>
+    // تعريف المتغيرات العامة
+    let currentQuestion = 0;
+    let score = 0;
+    let questions = [
+        { question: "كم عدد افراد العائله؟", options: ["6", "7", "8", "9"], answer: "7" },
+        { question: "من اكثر واحد عنده اصحاب؟", options: ["صقر", "علي", "محمد"], answer: "علي" },
+        { question: "من اكثر واحد يقرا كتب؟", options: ["ام يزن", "علي", "ام صقر"], answer: "ام يزن" },
+        { question: "من هو اخر العنقود؟", options: ["براءه", "محمد", "صقر"], answer: "محمد" },
+        { question: "من هو الرسام في العائله؟", options: ["محمد", "براءه", "ام يزن"], answer: "ام يزن" },
+        { question: "من هي التي ذكر اسمها في القران؟", options: ["ام يزن", "براءه", "ام صقر"], answer: "براءه" },
+        { question: "من هو المهندس في العائله؟", options: ["علي", "محمد او صقر", "براءه"], answer: "محمد او صقر" },
+        { question: "من هو عقيد القوم؟", options: ["علي", "ابو صقر", "محمد"], answer: "ابو صقر" },
+        { question: "من هي ست الحبايب؟", options: ["براءه", "ام صقر", "ام يزن"], answer: "ام صقر" },
+        { question: "كم عدد اولاد ام يزن؟", options: ["20 هههههههههههه", "2", "1"], answer: "2" },
+        { question: "من هو اول حفيد للعائله؟", options: ["محمد", "راكان", "يزن"], answer: "يزن" },
+        { question: "من هو اصغر فرد في العائله؟", options: ["محمد", "يزن", "راكان"], answer: "راكان" }
+    ];
+
+    // تحديث شريط التقدم
+    function updateProgress() {
+        const progressBar = document.querySelector('.progress-bar');
+        const progressText = document.querySelector('.progress-text');
+        const progress = ((currentQuestion + 1) / questions.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        progressText.textContent = `${Math.round(progress)}%`;
+    }
+
+    // خلط الأسئلة
+    function shuffleQuestions() {
+        for (let i = questions.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [questions[i], questions[j]] = [questions[j], questions[i]];
+        }
+    }
+
+    // خلط الخيارات
+    function shuffleOptions(options) {
+        for (let i = options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [options[i], options[j]] = [options[j], options[i]];
+        }
+        return options;
+    }
+
+    // بدء الاختبار
+    function startQuiz() {
+        const familyMember = document.getElementById("familyMember").value;
+        
+        if (!familyMember || familyMember === "اختر اسمك...") {
+            alert("الرجاء اختيار اسمك من القائمة");
+            return;
+        }
+
+        if (familyMember === "يزن" || familyMember === "راكان") {
+            document.querySelector(".welcome").classList.remove("show");
+            document.querySelector(".not-allowed").classList.add("show");
+            return;
+        }
+
+        document.getElementById("greeting").textContent = `مرحباً بك يا ${familyMember}! لنبدأ اللعبة!`;
+        document.querySelector(".welcome").classList.remove("show");
+        document.querySelector(".question-container").classList.add("show");
+
+        currentQuestion = 0;
+        score = 0;
+        shuffleQuestions();
+        showQuestion();
+    }
+
+    // العودة للصفحة الرئيسية
+    function goBack() {
+        document.querySelector(".not-allowed").classList.remove("show");
+        document.querySelector(".welcome").classList.add("show");
+    }
+
+    // عرض السؤال
+    function showQuestion() {
+        if (currentQuestion >= questions.length) {
+            showResult();
+            return;
+        }
+
+        updateProgress();
+        const question = questions[currentQuestion];
+        document.getElementById("questionText").textContent = question.question;
+
+        const optionsContainer = document.getElementById("options");
+        optionsContainer.innerHTML = "";
+
+        const shuffledOptions = shuffleOptions([...question.options]);
+        shuffledOptions.forEach(option => {
+            const button = document.createElement("button");
+            button.textContent = option;
+            button.onclick = () => checkAnswer(button, option);
+            optionsContainer.appendChild(button);
+        });
+    }
+
+    // التحقق من الإجابة
+    function checkAnswer(button, selectedOption) {
+        const isCorrect = selectedOption === questions[currentQuestion].answer;
+        
+        // تعطيل جميع الأزرار بعد الإجابة
+        document.querySelectorAll('.options button').forEach(btn => {
+            btn.style.pointerEvents = 'none';
+        });
+
+        if (isCorrect) {
+            score++;
+            button.classList.add("correct");
+        } else {
+            button.classList.add("wrong");
+            // إظهار الإجابة الصحيحة
+            document.querySelectorAll('.options button').forEach(btn => {
+                if (btn.textContent === questions[currentQuestion].answer) {
+                    btn.classList.add("correct");
+                }
+            });
+        }
+
+        setTimeout(() => {
+            currentQuestion++;
+            showQuestion();
+        }, 1500);
+    }
+
+    // عرض النتيجة النهائية
+    function showResult() {
+        document.querySelector(".question-container").classList.remove("show");
+        document.querySelector(".result-container").classList.add("show");
+
+        const percentage = Math.round((score / questions.length) * 100);
+        const scoreDisplay = document.getElementById("scoreDisplay");
+        const celebration = document.getElementById("celebration");
+        const finalResult = document.getElementById("finalResult");
+
+        scoreDisplay.textContent = `${percentage}%`;
+        
+        if (percentage === 100) {
+            celebration.textContent = "🎉 ممتاز! إجابات مثالية! 🎉";
+        } else if (percentage >= 80) {
+            celebration.textContent = "🌟 أحسنت! نتيجة رائعة! 🌟";
+        } else if (percentage >= 60) {
+            celebration.textContent = "👏 جيد! استمر في التحسن! 👏";
+        } else {
+            celebration.textContent = "💪 حاول مرة أخرى! 💪";
+        }
+
+        finalResult.textContent = `لقد أجبت على ${score} من ${questions.length} أسئلة بشكل صحيح`;
+    }
+
+    // إعادة الاختبار
+    function restartQuiz() {
+        currentQuestion = 0;
+        score = 0;
+        document.querySelector(".result-container").classList.remove("show");
+        document.querySelector(".welcome").classList.add("show");
+        document.querySelector('.progress-bar').style.width = '0%';
+    }
+
+    // إغلاق التطبيق
+    function closeApp() {
+        if (confirm('هل تريد حقاً إغلاق اللعبة؟')) {
+            window.close();
+        }
+    }
+
+    // تهيئة اللعبة عند تحميل الصفحة
+    window.onload = function() {
+        document.querySelector(".welcome").classList.add("show");
+    };
+</script>
+</body>
+</html>
